@@ -841,7 +841,7 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if !bucketExists {
-		log.Printf("[TRACE] S3 Bucket (%s) not found, removing from state", d.Id())
+		log.Printf("[WARN] S3 Bucket (%s) not found, removing from state", d.Id())
 		d.SetId("")
 		return nil
 	}

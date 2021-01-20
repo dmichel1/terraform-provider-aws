@@ -60,11 +60,12 @@ func dataSourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	bucket := d.Get("bucket").(string)
 
 	buckets, err := conn.ListBuckets(&s3.ListBucketsInput{})
-	bucketExists := findBucket(bucket, buckets.Buckets)
 
 	if err != nil {
 		return fmt.Errorf("failed getting S3 bucket: %s Bucket: %q", err, bucket)
 	}
+
+	bucketExists := findBucket(bucket, buckets.Buckets)
 
 	if !bucketExists {
 		return fmt.Errorf("error getting S3 Bucket (%s): not found", bucket)
