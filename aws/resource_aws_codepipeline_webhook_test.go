@@ -12,9 +12,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccAWSCodePipelineWebhook_basic(t *testing.T) {
-	githubToken := os.Getenv("GITHUB_TOKEN")
+const EnvVarGithubTokenUsageCodePipelineWebhook = "token with GitHub permissions to repository for CodePipeline webhook creation"
 
+func TestAccAWSCodePipelineWebhook_basic(t *testing.T) {
+	var githubToken string
 	var v codepipeline.ListWebhookItem
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	resourceName := "aws_codepipeline_webhook.test"
@@ -22,7 +23,7 @@ func TestAccAWSCodePipelineWebhook_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvironmentVariableSetPreCheck("GITHUB_TOKEN", t)
+			githubToken = TestAccEnvironmentVariableSetPreCheck(t, EnvVarGithubToken, EnvVarGithubTokenUsageCodePipelineWebhook)
 			testAccPreCheckAWSCodePipelineSupported(t)
 		},
 		Providers:    testAccProviders,
@@ -48,8 +49,7 @@ func TestAccAWSCodePipelineWebhook_basic(t *testing.T) {
 }
 
 func TestAccAWSCodePipelineWebhook_ipAuth(t *testing.T) {
-	githubToken := os.Getenv("GITHUB_TOKEN")
-
+	var githubToken string
 	var v codepipeline.ListWebhookItem
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	resourceName := "aws_codepipeline_webhook.test"
@@ -57,7 +57,7 @@ func TestAccAWSCodePipelineWebhook_ipAuth(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvironmentVariableSetPreCheck("GITHUB_TOKEN", t)
+			githubToken = TestAccEnvironmentVariableSetPreCheck(t, EnvVarGithubToken, EnvVarGithubTokenUsageCodePipelineWebhook)
 			testAccPreCheckAWSCodePipelineSupported(t)
 		},
 		Providers:    testAccProviders,
@@ -83,8 +83,7 @@ func TestAccAWSCodePipelineWebhook_ipAuth(t *testing.T) {
 }
 
 func TestAccAWSCodePipelineWebhook_unauthenticated(t *testing.T) {
-	githubToken := os.Getenv("GITHUB_TOKEN")
-
+	var githubToken string
 	var v codepipeline.ListWebhookItem
 	rName := acctest.RandomWithPrefix("tf-acc-test")
 	resourceName := "aws_codepipeline_webhook.test"
@@ -92,7 +91,7 @@ func TestAccAWSCodePipelineWebhook_unauthenticated(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvironmentVariableSetPreCheck("GITHUB_TOKEN", t)
+			githubToken = TestAccEnvironmentVariableSetPreCheck(t, EnvVarGithubToken, EnvVarGithubTokenUsageCodePipelineWebhook)
 			testAccPreCheckAWSCodePipelineSupported(t)
 		},
 		Providers:    testAccProviders,
@@ -125,7 +124,7 @@ func TestAccAWSCodePipelineWebhook_tags(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvironmentVariableSetPreCheck("GITHUB_TOKEN", t)
+			githubToken = TestAccEnvironmentVariableSetPreCheck(t, EnvVarGithubToken, EnvVarGithubTokenUsageCodePipelineWebhook)
 			testAccPreCheckAWSCodePipelineSupported(t)
 		},
 		Providers:    testAccProviders,
@@ -189,7 +188,7 @@ func TestAccAWSCodePipelineWebhook_UpdateAuthenticationConfiguration_SecretToken
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvironmentVariableSetPreCheck("GITHUB_TOKEN", t)
+			githubToken = TestAccEnvironmentVariableSetPreCheck(t, EnvVarGithubToken, EnvVarGithubTokenUsageCodePipelineWebhook)
 			testAccPreCheckAWSCodePipelineSupported(t)
 		},
 		Providers:    testAccProviders,

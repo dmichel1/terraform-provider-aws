@@ -2,7 +2,6 @@ package aws
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"testing"
 
@@ -467,15 +466,15 @@ func TestAccAWSCodePipeline_WithNamespace(t *testing.T) {
 }
 
 func TestAccAWSCodePipeline_WithGitHubv1SourceAction(t *testing.T) {
+	var githubToken string
 	var v codepipeline.PipelineDeclaration
 	name := acctest.RandString(10)
 	resourceName := "aws_codepipeline.test"
-	githubToken := os.Getenv("GITHUB_TOKEN")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() {
 			testAccPreCheck(t)
-			testAccEnvironmentVariableSetPreCheck("GITHUB_TOKEN", t)
+			githubToken = TestAccEnvironmentVariableSetPreCheck(t, EnvVarGithubToken, "token with GitHub permissions to repository for CodePipeline source configuration")
 			testAccPreCheckAWSCodePipelineSupported(t)
 		},
 		Providers:    testAccProviders,
