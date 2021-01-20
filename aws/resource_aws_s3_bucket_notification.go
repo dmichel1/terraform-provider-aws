@@ -352,15 +352,16 @@ func resourceAwsS3BucketNotificationDelete(d *schema.ResourceData, meta interfac
 	return nil
 }
 
+
+
 func resourceAwsS3BucketNotificationRead(d *schema.ResourceData, meta interface{}) error {
 	s3conn := meta.(*AWSClient).s3conn
 
-	var err error
-	_, err = s3conn.HeadBucket(&s3.HeadBucketInput{
-		Bucket: aws.String(d.Id()),
-	})
+	buckets, err := s3conn.ListBuckets(&s3.ListBucketsInput{})
+	bucketExists := findBucket(d.Id(), buckets.Buckets)
+
 	if err != nil {
-		if awsError, ok := err.(awserr.RequestFailure); ok && awsError.StatusCode() == 404 {
+		if !bucketExists {
 			log.Printf("[WARN] S3 Bucket (%s) not found, error code (404)", d.Id())
 			d.SetId("")
 			return nil

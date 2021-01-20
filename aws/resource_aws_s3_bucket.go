@@ -795,22 +795,32 @@ func resourceAwsS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 	return resourceAwsS3BucketRead(d, meta)
 }
 
+func findBucket(name string, buckets []*s3.Bucket) bool {
+	for _, b := range buckets {
+		if *b.Name == name {
+			return true
+		}
+	}
+	return false
+}
+
 func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	s3conn := meta.(*AWSClient).s3conn
 	ignoreTagsConfig := meta.(*AWSClient).IgnoreTagsConfig
 
-	input := &s3.HeadBucketInput{
-		Bucket: aws.String(d.Id()),
-	}
+	bucketName := d.Id()
 
-	err := resource.Retry(s3BucketCreationTimeout, func() *resource.RetryError {
-		_, err := s3conn.HeadBucket(input)
+	input := &s3.ListBucketsInput{}
 
-		if d.IsNewResource() && isAWSErrRequestFailureStatusCode(err, 404) {
-			return resource.RetryableError(err)
-		}
+	var bucketExists bool
+	var buckets *s3.ListBucketsOutput
+	var err error
+	err = resource.Retry(s3BucketCreationTimeout, func() *resource.RetryError {
+		buckets, err = s3conn.ListBuckets(input)
 
-		if d.IsNewResource() && isAWSErr(err, s3.ErrCodeNoSuchBucket, "") {
+		bucketExists = findBucket(bucketName, buckets.Buckets)
+
+		if d.IsNewResource() && !bucketExists {
 			return resource.RetryableError(err)
 		}
 
@@ -822,11 +832,16 @@ func resourceAwsS3BucketRead(d *schema.ResourceData, meta interface{}) error {
 	})
 
 	if isResourceTimeoutError(err) {
-		_, err = s3conn.HeadBucket(input)
+		buckets, err = s3conn.ListBuckets(input)
+		bucketExists = findBucket(bucketName, buckets.Buckets)
+
+		if !bucketExists {
+			err = fmt.Errorf("cannot find bucket in ListBuckets response")
+		}
 	}
 
-	if isAWSErrRequestFailureStatusCode(err, 404) || isAWSErr(err, s3.ErrCodeNoSuchBucket, "") {
-		log.Printf("[WARN] S3 Bucket (%s) not found, removing from state", d.Id())
+	if !bucketExists {
+		log.Printf("[TRACE] S3 Bucket (%s) not found, removing from state", d.Id())
 		d.SetId("")
 		return nil
 	}
